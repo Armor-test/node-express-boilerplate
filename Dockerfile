@@ -1,7 +1,7 @@
 # Base stage named "node-app"
 FROM node:alpine AS node-app
 
-RUN mkdir -p /app/node-app && chown -R node:node /app/node-app
+# RUN mkdir -p /app/node-app && chown -R node:node /app/node-app
 
 WORKDIR /app
 
@@ -11,9 +11,9 @@ COPY package.json yarn.lock ./
 RUN yarn install --pure-lockfile
 
 # Switch to node user AFTER dependencies are installed
-USER node
+# USER node
 
-COPY --chown=node:node . .
+# COPY --chown=node:node . .
 
 EXPOSE 3000
 
