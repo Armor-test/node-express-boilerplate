@@ -1,8 +1,9 @@
-FROM node:alpine
+# Base stage named "node-app"
+FROM node:alpine AS node-app
 
-RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
+RUN mkdir -p node-app && chown -R node:node node-app
 
-WORKDIR /usr/src/node-app
+WORKDIR /app
 
 COPY package.json yarn.lock ./
 
@@ -13,3 +14,9 @@ RUN yarn install --pure-lockfile
 COPY --chown=node:node . .
 
 EXPOSE 3000
+
+# Final image (optional, if needed)
+FROM node:alpine AS final
+WORKDIR /app
+COPY --from=node-app /app .
+CMD ["node", "server.js"]

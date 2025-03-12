@@ -17,7 +17,7 @@
           "test-file-path": "tests/unit/middlewares/error.test.js"
         }
       ],
-      "test-command": "npm run coverage",
+      "test-command": "yarn coverage",
       "coverage-type": "lcov",
       "code-coverage-report-path": "coverage/lcov.info",
       "desired-coverage": 90,
