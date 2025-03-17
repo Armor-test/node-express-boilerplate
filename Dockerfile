@@ -3,10 +3,14 @@ FROM node:20 AS node-app
 
 # RUN mkdir -p /app/node-app && chown -R node:node /app/node-app
 RUN apt-get update && apt-get install -y wget gnupg curl && \
+    mkdir -p /etc/apt/keyrings && \
     curl -fsSL https://pgp.mongodb.com/server-6.0.asc | tee /etc/apt/keyrings/mongodb-server-6.0.gpg > /dev/null && \
     echo "deb [signed-by=/etc/apt/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/6.0 main" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list && \
     apt-get update && apt-get install -y mongodb-org && \
     rm -rf /var/lib/apt/lists/*
+
+# Set up MongoDB required directories
+RUN mkdir -p /data/db /var/log/mongodb && chown -R mongodb:mongodb /data/db
 
 WORKDIR /app
 
@@ -25,8 +29,9 @@ COPY . .
 EXPOSE 3000
 EXPOSE 27017  
 
-CMD mongod --fork --logpath /var/log/mongodb.log && yarn start
-
+CMD mongod --bind_ip_all --logpath /var/log/mongodb/mongodb.log --dbpath /data/db --fork && \
+    sleep 5 && \
+    yarn start
 # Final image (optional, if needed)
 # FROM node:alpine AS final
 # WORKDIR /app
