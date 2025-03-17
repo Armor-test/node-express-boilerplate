@@ -26,6 +26,7 @@ COPY . .
 # USER node
 
 # COPY --chown=node:node . .
+ENV MONGODB_URL=mongodb://127.0.0.1:27017/node-boilerplate
 
 EXPOSE 3000
 EXPOSE 27017  
