@@ -204,5 +204,129 @@ describe('Error middlewares', () => {
       config.env = process.env.NODE_ENV;
     });
 
+    test('should not expose sensitive information in production environment in errorHandler', () => {
+      const sensitiveMessage = "Sensitive data: user password 12345";
+      const error = new ApiError(httpStatus.BAD_REQUEST, sensitiveMessage, false);
+      const req = httpMocks.createRequest();
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+    
+      config.env = 'production';
+    
+      errorHandler(error, req, res);
+    
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: httpStatus.INTERNAL_SERVER_ERROR,
+          message: httpStatus[httpStatus.INTERNAL_SERVER_ERROR],
+        })
+      );
+      expect(res.locals.errorMessage).toBe(sensitiveMessage);
+      expect(res._getData()).not.toHaveProperty('stack');
+    
+      // Reset environment
+      config.env = process.env.NODE_ENV;
+    });
+
+
+    test('should handle errors with deeply nested properties in errorConverter', () => {
+      const deepNestedError = new Error('Deep nested error');
+      let current = deepNestedError;
+      for (let i = 0; i < 15; i++) {
+        current.nested = { level: i };
+        current = current.nested;
+      }
+      const req = httpMocks.createRequest();
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+    
+      errorConverter(deepNestedError, req, res, next);
+    
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+      const convertedError = next.mock.calls[0][0];
+      expect(convertedError.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(convertedError.message).toBe(deepNestedError.message);
+      expect(convertedError.isOperational).toBe(false);
+    });
+
+
+    test('should send raw XSS payload in error message and highlight need for sanitization in errorHandler', () => {
+      const xssMessage = "<script>alert('XSS')</script>";
+      const error = new ApiError(httpStatus.BAD_REQUEST, xssMessage);
+      const req = httpMocks.createRequest();
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+    
+      // Set environment to development
+      config.env = 'development';
+    
+      errorHandler(error, req, res);
+    
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: error.statusCode,
+          message: error.message,
+          stack: error.stack,
+        })
+      );
+      // Note: This test highlights that raw messages are sent and suggests sanitization is needed.
+      // Ensure that in real applications, messages are properly sanitized to prevent XSS.
+    });
+
+
+    test('should preserve error status and message in unrecognized environment in errorHandler', () => {
+      const error = new ApiError(httpStatus.BAD_REQUEST, 'Bad Request');
+      const req = httpMocks.createRequest();
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+    
+      // Set environment to unrecognized value
+      config.env = 'staging';
+    
+      errorHandler(error, req, res);
+    
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: error.statusCode,
+          message: error.message,
+        })
+      );
+      expect(res.locals.errorMessage).toBe(error.message);
+      expect(res._getData()).not.toHaveProperty('stack');
+    });
+
+
+    test('should convert number error to ApiError with statusCode 500 in errorConverter', () => {
+      const error = 404;
+      const req = httpMocks.createRequest();
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+    
+      errorConverter(error, req, res, next);
+    
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+      const convertedError = next.mock.calls[0][0];
+      expect(convertedError.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(convertedError.message).toBe(httpStatus[httpStatus.INTERNAL_SERVER_ERROR]);
+      expect(convertedError.isOperational).toBe(false);
+    });
+
+
+    test('should convert string error to ApiError with statusCode 500 in errorConverter', () => {
+      const error = "Simple error string";
+      const req = httpMocks.createRequest();
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+    
+      errorConverter(error, req, res, next);
+    
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+      const convertedError = next.mock.calls[0][0];
+      expect(convertedError.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(convertedError.message).toBe(httpStatus[httpStatus.INTERNAL_SERVER_ERROR]);
+      expect(convertedError.isOperational).toBe(false);
+    });
+
+
   });
 });
