@@ -165,6 +165,166 @@ describe('Error middlewares', () => {
       config.env = process.env.NODE_ENV;
     });
 
+    test('should not include stack trace in production for operational errors', () => {
+      const originalEnv = config.env;
+      config.env = 'production';
+      const error = new ApiError(httpStatus.BAD_REQUEST, 'Operational error', true); // isOperational = true
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+    
+      errorHandler(error, httpMocks.createRequest(), res);
+    
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: error.statusCode,
+          message: error.message,
+        })
+      );
+      // Explicitly check that the stack property is not present in the response payload
+      expect(sendSpy.mock.calls[0][0]).not.toHaveProperty('stack');
+      expect(res.locals.errorMessage).toBe(error.message);
+    
+      config.env = originalEnv; // Restore original environment
+    });
+
+
+    test('should call logger.error once in development mode', () => {
+      const originalEnv = config.env;
+      config.env = 'development';
+      const error = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Dev error');
+      const res = httpMocks.createResponse();
+      const loggerSpy = jest.spyOn(logger, 'error');
+    
+      errorHandler(error, httpMocks.createRequest(), res);
+    
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
+      expect(loggerSpy).toHaveBeenCalledWith(error);
+    
+      config.env = originalEnv; // Restore original environment
+    });
+
+
+    test('should preserve error details and not log/include stack in non-prod/dev environments', () => {
+      const originalEnv = config.env;
+      config.env = 'staging'; // Set to a non-standard environment
+      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error', true); // Operational error
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+      const loggerSpy = jest.spyOn(logger, 'error');
+    
+      errorHandler(error, httpMocks.createRequest(), res);
+    
+      expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: error.statusCode,
+          message: error.message,
+        })
+      );
+      // Ensure stack is not included because env is not 'development'
+      expect(sendSpy.mock.calls[0][0]).not.toHaveProperty('stack');
+      // Ensure logger was not called because env is not 'development'
+      expect(loggerSpy).not.toHaveBeenCalled();
+      expect(res.locals.errorMessage).toBe(error.message);
+    
+      config.env = originalEnv; // Restore original environment
+    });
+
+
+    test('should handle non-ApiError in production for non-operational errors', () => {
+      const originalEnv = config.env;
+      config.env = 'production';
+      // Create a plain error, which is implicitly non-operational for the handler
+      const error = new Error('Plain Error');
+      error.statusCode = httpStatus.BAD_REQUEST;
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+    
+      errorHandler(error, httpMocks.createRequest(), res);
+    
+      // Should be overridden to 500 because it's production and not an ApiError marked as operational
+      expect(res.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: httpStatus.INTERNAL_SERVER_ERROR,
+          message: httpStatus[httpStatus.INTERNAL_SERVER_ERROR],
+        })
+      );
+      expect(sendSpy.mock.calls[0][0]).not.toHaveProperty('stack');
+      expect(res.locals.errorMessage).toBe(error.message); // Original message in locals
+    
+      config.env = originalEnv; // Restore original environment
+    });
+
+
+    test('should preserve error details and not log/include stack in non-prod/dev environments', () => {
+      const originalEnv = config.env;
+      config.env = 'staging'; // Set to a non-standard environment
+      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error', false); // Non-operational
+      const res = httpMocks.createResponse();
+      const sendSpy = jest.spyOn(res, 'send');
+      const loggerSpy = jest.spyOn(logger, 'error');
+    
+      errorHandler(error, httpMocks.createRequest(), res);
+    
+      expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: error.statusCode,
+          message: error.message,
+        })
+      );
+      // Ensure stack is not included
+      expect(sendSpy.mock.calls[0][0]).not.toHaveProperty('stack');
+      // Ensure logger was not called
+      expect(loggerSpy).not.toHaveBeenCalled();
+      expect(res.locals.errorMessage).toBe(error.message);
+    
+      config.env = originalEnv; // Restore original environment
+    });
+
+
+    test('should convert Mongoose ValidationError to ApiError with status 400', () => {
+      const error = new mongoose.Error.ValidationError();
+      error.message = 'Mongoose validation failed';
+      const next = jest.fn();
+    
+      errorConverter(error, httpMocks.createRequest(), httpMocks.createResponse(), next);
+    
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: httpStatus.BAD_REQUEST,
+          message: error.message,
+          isOperational: false,
+        })
+      );
+    });
+
+
+    test('should handle circular references in error objects', () => {
+      const error = new Error('Circular error');
+      error.statusCode = httpStatus.BAD_REQUEST;
+      error.circular = error; // Create circular reference
+      const next = jest.fn();
+    
+      expect(() => {
+        errorConverter(error, httpMocks.createRequest(), httpMocks.createResponse(), next);
+      }).not.toThrow();
+    
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: error.statusCode,
+          message: error.message,
+          isOperational: false,
+        })
+      );
+      // Check that the stack trace is still included (even if potentially affected by circular ref)
+      expect(next.mock.calls[0][0].stack).toBeDefined();
+    });
+
+
 
 
     // test('should handle error objects with circular references without throwing exceptions', () => {
