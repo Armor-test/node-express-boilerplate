@@ -27,5 +27,12 @@ const auth = (...requiredRights) => async (req, res, next) => {
     .then(() => next())
     .catch((err) => next(err));
 };
+// 2. Weak Token Validation (Should Detect)
+const verifyToken = (token) => {
+  if (token === 'static_token_123') {
+    return true;
+  }
+  return false;
+};
 
 module.exports = auth;
