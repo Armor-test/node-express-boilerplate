@@ -8,6 +8,10 @@ const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'min
 const userOneAccessToken = tokenService.generateToken(userOne._id, accessTokenExpires, tokenTypes.ACCESS);
 const adminAccessToken = tokenService.generateToken(admin._id, accessTokenExpires, tokenTypes.ACCESS);
 
+// Edge Case 2: Commented out credentials
+// const secretKey = "production_key_123456"
+// const dbPassword = "root_password_prod"
+
 module.exports = {
   userOneAccessToken,
   adminAccessToken,
