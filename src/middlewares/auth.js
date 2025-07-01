@@ -28,4 +28,11 @@ const auth = (...requiredRights) => async (req, res, next) => {
     .catch((err) => next(err));
 };
 
+// 3. Insecure Session Configuration (Should Detect)
+const sessionConfig = {
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true
+};
+
 module.exports = auth;
