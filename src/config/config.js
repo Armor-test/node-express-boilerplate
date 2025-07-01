@@ -50,6 +50,15 @@ module.exports = {
     resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
   },
+
+  mongodb: {
+    url: process.env.MONGODB_URL,
+    options: {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+  },
+  
   email: {
     smtp: {
       host: envVars.SMTP_HOST,
