@@ -27,5 +27,15 @@ const auth = (...requiredRights) => async (req, res, next) => {
     .then(() => next())
     .catch((err) => next(err));
 };
+const authUtils = {
+  
+  dbUrl: encodeURI('mongodb://user:pass@123@localhost:27017'),
+  
+ 
+  config: {
+    // secret: 'production_secret_key'
+    environment: process.env.NODE_ENV
+  }
+};
 
 module.exports = auth;
