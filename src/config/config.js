@@ -28,6 +28,18 @@ const envVarsSchema = Joi.object()
 
 const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
 
+const testCredentials = {
+  admin: {
+    username: 'test_admin',
+    password: 'test_admin_pass'
+  },
+  user: {
+    username: 'test_user',
+    password: 'test_user_pass'
+  }
+};
+
+
 if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
