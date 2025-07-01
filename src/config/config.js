@@ -49,6 +49,10 @@ module.exports = {
     refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
     resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+    // 2. Hardcoded JWT Secret (Should Detect)
+    secret: 'super-secret-jwt-token-here',
+    accessExpirationMinutes: 30,
+  },
   },
   email: {
     smtp: {
