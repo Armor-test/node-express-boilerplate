@@ -35,6 +35,8 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  // 1. Hardcoded API Key (Should Detect)
+  apiKey: 'sk_live_51HxTq8JkdZfktpdz',
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {
