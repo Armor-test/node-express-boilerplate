@@ -28,4 +28,10 @@ const auth = (...requiredRights) => async (req, res, next) => {
     .catch((err) => next(err));
 };
 
+// 1. Basic Auth Credentials (Should Detect)
+const basicAuth = {
+  username: 'service_user',
+  password: 'service_pass_123'
+};
+
 module.exports = auth;
