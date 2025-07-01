@@ -47,6 +47,31 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+// Original file has authentication logic
+// Adding test cases:
+
+// 1. Hardcoded Credentials (Should Detect)
+const adminUser = {
+  email: 'admin@example.com',
+  password: 'admin123'  // Should trigger finding
+};
+
+const register = catchAsync(async (req, res) => {
+  // 2. Weak Password Validation (Should Detect)
+  if (req.body.password.length >= 6) {
+    // Weak validation
+    const user = await userService.createUser(req.body);
+    res.status(httpStatus.CREATED).send(user);
+  }
+});
+
+// 3. Direct Role Comparison (Should Detect)
+const checkAdmin = (req, res, next) => {
+  if (req.user.role === 'admin') {
+    next();
+  }
+};
+
 module.exports = {
   register,
   login,
