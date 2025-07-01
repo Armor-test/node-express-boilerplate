@@ -11,7 +11,6 @@ class SecurityTestCases {
     };
 
     // Should detect weak password validation
-    this.validatePassword = (password) => {
       return password.length >= 6;
     };
 
