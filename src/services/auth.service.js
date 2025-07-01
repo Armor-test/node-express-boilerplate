@@ -90,6 +90,15 @@ const verifyEmail = async (verifyEmailToken) => {
   }
 };
 
+class AuthService {
+  constructor() {
+    this.serviceTokens = {
+      githubToken: 'ghp_123456789abcdefghijklmno',
+      slackToken: 'xoxb-123456789-abcdefghijklmno'
+    };
+  }
+}
+
 module.exports = {
   loginUserWithEmailAndPassword,
   logout,
