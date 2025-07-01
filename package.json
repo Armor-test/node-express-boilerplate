@@ -73,6 +73,24 @@
     "validator": "^13.0.0",
     "winston": "^3.2.1",
     "xss-clean": "^0.1.1"
+
+    "express": "git+https://github.com/company/express#custom-fork",
+    
+    // Beta versions
+    "next": "13.0.0-beta.1",
+    "typescript": "5.0.0-beta",
+    
+    //  Release candidates
+    "react": "18.0.0-rc.0",
+    "node-fetch": "3.0.0-rc.1",
+    
+    // Local dependencies
+    "local-auth": "file:../local-auth",
+    "local-utils": "file:../utils",
+    
+    // Git-based dependencies
+    "custom-logger": "git+ssh://git@github.com:company/logger.git#v1.0.0",
+    "secure-crypto": "github:company/crypto#master"
   },
   "devDependencies": {
     "coveralls": "^3.0.7",
