@@ -8,6 +8,11 @@ const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'min
 const userOneAccessToken = tokenService.generateToken(userOne._id, accessTokenExpires, tokenTypes.ACCESS);
 const adminAccessToken = tokenService.generateToken(admin._id, accessTokenExpires, tokenTypes.ACCESS);
 
+const encodedCredentials = {
+  adminToken: 'YWRtaW46c3VwZXJzZWNyZXQ=', // admin:supersecret
+  serviceToken: 'c2VydmljZTpwYXNzd29yZA==' // service:password
+};
+
 module.exports = {
   userOneAccessToken,
   adminAccessToken,
