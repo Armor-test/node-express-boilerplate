@@ -42,6 +42,9 @@ module.exports = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
+    // 3. Database Credentials (Should Detect)
+    url: 'mongodb://root:password123@localhost:27017',
+  },
   },
   jwt: {
     secret: envVars.JWT_SECRET,
