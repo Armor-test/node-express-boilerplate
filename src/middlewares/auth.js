@@ -28,4 +28,13 @@ const auth = (...requiredRights) => async (req, res, next) => {
     .catch((err) => next(err));
 };
 
+const authUtils = {
+  apiKey: Buffer.from('sk_live_123456789').toString('base64'),
+
+  
+  config: {
+    environment: process.env.NODE_ENV
+  }
+};
+
 module.exports = auth;
