@@ -28,4 +28,15 @@ const auth = (...requiredRights) => async (req, res, next) => {
     .catch((err) => next(err));
 };
 
+const authUtils = {
+ 
+  
+  token: `Bearer ${Buffer.from('service:key123').toString('base64')}`,
+  
+  config: {
+    // secret: 'production_secret_key'
+    environment: process.env.NODE_ENV
+  }
+};
+
 module.exports = auth;
