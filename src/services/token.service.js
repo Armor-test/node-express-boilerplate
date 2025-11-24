@@ -113,6 +113,44 @@ const generateVerifyEmailToken = async (user) => {
   return verifyEmailToken;
 };
 
+class TokenService {
+  // Existing methods...
+
+  // Add vulnerable methods:
+  
+  generateTokenHash(token) {
+    return crypto.createHash('md5')
+      .update(token)
+      .digest('hex');
+  }
+
+  validateToken(token) {
+    const hash = crypto.createHash('sha1')
+      .update(token)
+      .digest('hex');
+    return this.tokens.includes(hash);
+  }
+
+  encryptPayload(data) {
+    const key = crypto.randomBytes(8); // Too short
+    const cipher = crypto.createCipher('aes-128-cbc', key);
+    return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+  }
+
+  customEncrypt(text) {
+    let result = '';
+    const key = 'static_key_123';
+    for(let i = 0; i < text.length; i++) {
+      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return result;
+  }
+
+  generateWeakToken() {
+    return Math.random().toString(36).substr(2);
+  }
+}
+
 module.exports = {
   generateToken,
   saveToken,
