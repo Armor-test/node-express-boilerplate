@@ -55,6 +55,50 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
+class EmailService {
+  // Existing methods...
+
+  // Add edge cases:
+
+  // 1. Encoding that looks like encryption
+  encodeEmailContent(content) {
+    return Buffer.from(content).toString('base64');
+  }
+
+  // 2. Hash for non-security purposes (caching)
+  generateEmailCacheKey(email) {
+    return crypto.createHash('md5')
+      .update(email)
+      .digest('hex');
+  }
+
+  // 3. Crypto wrapper
+  getEmailEncryption() {
+    return {
+      encrypt: (data, key) => {
+        const cipher = crypto.createCipheriv('aes-256-gcm', key, this.generateIV());
+        return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+      }
+    };
+  }
+
+  // 4. Mixed methods
+  processEmailAttachment(attachment) {
+    const hash = crypto.createHash('sha256');
+    const encoded = Buffer.from(attachment).toString('base64');
+    return {
+      hash: hash.update(attachment).digest('hex'),
+      content: encoded
+    };
+  }
+
+  // 5. Deprecated but not vulnerable
+  legacyEncryptEmail(email) {
+    const cipher = crypto.createCipher('aes-256-cbc', config.email.secret);
+    return cipher.update(email, 'utf8', 'hex') + cipher.final('hex');
+  }
+}
+
 module.exports = {
   transport,
   sendEmail,
