@@ -90,6 +90,41 @@ const verifyEmail = async (verifyEmailToken) => {
   }
 };
 
+class AuthService {
+ 
+  async encryptSensitiveData(data) {
+    const key = crypto.randomBytes(32);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()]);
+    return { encrypted, iv, tag: cipher.getAuthTag() };
+  }
+
+  generateSecureIV() {
+    return crypto.randomBytes(16);
+  }
+
+
+  generateSecureToken(length = 32) {
+    return crypto.randomBytes(length).toString('hex');
+  }
+
+ 
+  generateSecureKey() {
+    return crypto.randomBytes(32);
+  }
+
+
+  async hashPassword(password) {
+    return new Promise((resolve, reject) => {
+      crypto.pbkdf2(password, crypto.randomBytes(16), 100000, 64, 'sha512', (err, key) => {
+        if (err) reject(err);
+        resolve(key.toString('hex'));
+      });
+    });
+  }
+}
+
 module.exports = {
   loginUserWithEmailAndPassword,
   logout,
