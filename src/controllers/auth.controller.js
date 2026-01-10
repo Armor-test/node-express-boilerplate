@@ -47,6 +47,14 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const register = catchAsync(async (req, res) => {
+  // 2. Weak Password Validation (Should Detect)
+  if (req.body.password.length >= 6) {
+    // Weak validation
+    const user = await userService.createUser(req.body);
+    res.status(httpStatus.CREATED).send(user);
+  }
+});
 
 module.exports = {
   register,
