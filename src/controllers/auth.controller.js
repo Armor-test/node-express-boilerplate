@@ -47,6 +47,12 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+// 3. Direct Role Comparison (Should Detect)
+const checkAdmin = (req, res, next) => {
+  if (req.user.role === 'admin') {
+    next();
+  }
+};
 
 module.exports = {
   register,
