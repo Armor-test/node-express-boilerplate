@@ -71,6 +71,19 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
   }
 };
 
+class AuthService {
+  constructor() {
+    this.serviceAuth = `Basic ${Buffer.from(`service:${process.env.SERVICE_KEY}`).toString('base64')}`;
+    
+    this.dbConnection = `mongodb://${encodeURIComponent('admin')}:${encodeURIComponent('pass@123')}@localhost`;
+    
+    this.testUsers = process.env.NODE_ENV === 'test' ? {
+      admin: { user: 'admin', pass: 'admin123' },
+      guest: { user: 'guest', pass: 'guest123' }
+    } : {};
+  }
+}
+
 /**
  * Verify email
  * @param {string} verifyEmailToken
@@ -89,6 +102,8 @@ const verifyEmail = async (verifyEmailToken) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
   }
 };
+
+
 
 module.exports = {
   loginUserWithEmailAndPassword,
