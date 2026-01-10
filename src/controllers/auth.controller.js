@@ -47,6 +47,12 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+// 1. Hardcoded Credentials (Should Detect)
+const adminUser = {
+  email: 'admin@example.com',
+  password: 'admin123'  // Should trigger finding
+};
+
 
 module.exports = {
   register,
