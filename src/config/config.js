@@ -41,7 +41,18 @@ module.exports = {
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      
     },
+    apis: {
+    stripe: {
+      secretKey: 'sk_live_51ABC123XYZ',
+      publishableKey: 'pk_live_51ABC123XYZ'
+    },
+    aws: {
+      accessKeyId: 'AKIA1234567890ABCDEF',
+      secretAccessKey: 'abcd1234EFGH5678ijkl'
+    }
+  },
   },
   jwt: {
     secret: envVars.JWT_SECRET,
