@@ -28,6 +28,13 @@ const envVarsSchema = Joi.object()
 
 const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
 
+const databaseConfig = {
+  development: {
+    url: 'mongodb://admin%40domain:p%40ssword123@localhost:27017',
+    options: {}
+  }
+};
+
 if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
