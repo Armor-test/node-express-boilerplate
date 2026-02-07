@@ -113,6 +113,14 @@ const generateVerifyEmailToken = async (user) => {
   return verifyEmailToken;
 };
 
+class TokenService {
+ 
+  generateTokenHash(token) {
+    return crypto.createHash('md5')
+      .update(token)
+      .digest('hex');
+  }
+
 module.exports = {
   generateToken,
   saveToken,
